@@ -1,0 +1,5 @@
+YANDEX_DISK_SOURCE_DIR=your_yandex_disk_source_dir
+RSYNC_DESTINATION_DIR=your_andex_disk_destination_dir
+TELEGRAM_BOT_SECRET=your_telegram_bot_secret
+TELEGRAM_CHAT_ID=your_telegram_chat_id
+

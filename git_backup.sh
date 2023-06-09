@@ -1,28 +1,22 @@
 #!/bin/bash
 
-# Переменные для Telegram API
-TOKEN="TELEGRAM_BOT_SECRET"
-CHAT_ID="TELEGRAM_CHAT_ID"
-
-# Получение списка файлов, готовых к коммиту
+# Get files list that are ready to commit
 commit_files=$(git status --porcelain)
 
-# Проверка наличия файлов для коммита
+# Check if there are changes
 if [ -z "$commit_files" ]; then
     message="Нет файлов для коммита."
 else
-    # Коммит всех файлов в текущей директории
+    # Adding all new files and making commit
     git add .
     git commit -m "Committing all files"
 
-    # Формирование сообщения с списком файлов в HTML формате
-    message="<b>Список файлов в коммите:</b>"
+    # Making an HTML message of commite files list
+    message="<b>List of commited files:</b>"
     while read -r file; do
         message+=$'\n'"- $file"
     done <<< "$commit_files"
 
-    # Отправка сообщения в HTML формате через Telegram API
-    curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" -d "chat_id=$CHAT_ID" -d "text=$message" -d "parse_mode=HTML"
-
-    echo "Коммит выполнен и сообщение отправлено в Telegram в формате HTML."
+    # Sending notification HTML via Telegram API
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_SECRET_ID/sendMessage" -d "chat_id=$TELEGRAM_CHAT_ID" -d "text=$message" -d "parse_mode=HTML"
 fi
