@@ -1,9 +1,15 @@
 # Yandex.Disk backup tool 
-This script was created to automate daily backups to Yandex.Disk. The script is designed to run on a Raspberry Pi Zero with Raspbian OS, but it can also work on Ubuntu or Debian OS.
-To start, you need to configure a connection to Yandex.Disk using the webdav protocol.
+This script was created to automate daily backups of Yandex.Disk. The script is designed to run on a Raspberry Pi Zero with Raspbian OS, but it can also work on Ubuntu or Debian OS.
+Scenario of backup:
+1. Mount Yandex.Disk via webdav protocol and sync files automatically.
+2. Make a copy of a mounted disk using rsync tool.
+3. Use git for storing diffs of documents.
+4. Collect list of changes using git.
+5. Make git commit of changes.
+6. Send notification message with changes list.
 
-Here's a guide on how to configure a connection to Yandex.Disk using the webdav protocol on Raspbian:
-
+## To start, you need to configure a connection to Yandex.Disk using the webdav protocol.
+Here's a guide on how to configure a connection:
 1. Open the Terminal on your Raspberry Pi running Raspbian.
 
 2. Install the necessary packages by entering the following command:
@@ -25,7 +31,7 @@ sudo nano /etc/davfs2/secrets
 ```console
 https://webdav.yandex.ru username password
 ```
-Replace username with your Yandex username and password with your Yandex password.
+Replace username with your Yandex username and password with your Yandex password. Create Yandex.Disk special password for external app in Yandex account admin.
 
 6. Save and exit the file by pressing Ctrl + X, then Y, and finally Enter.
 
@@ -57,9 +63,42 @@ You should now be able to access and use your Yandex.Disk files and folders thro
 
 Remember to replace username and password in step 5 with your actual Yandex.Disk credentials.
 
-1. rsync.sh is called by crontab
-2. Script makes rsync with webdav mounted yandex directory
-3. Then script calls git_backup.sh
-4. Git backup script collects changes, commits them and sends changes to telegram chat
+## Next step you need to setup new directory and script parameters:
+1. Making a new directory for storing a copy of your files:
+```console
+mkdir ~/yadisk
+mkdir ~/yadisk/files
+```
 
-Need to specify TELEGRAM_BOT_SECRET and TELEGRAM_CHAT_ID 
+2. Clonew this repo inside root of your new directory:
+```console
+cd ~/yadisk
+git clone git@github.com:permyakovaa/yandex_disk_backup.git
+```
+
+3. Make variables.sh file:
+```console
+cp variables.sh.dist variables.sh
+```
+
+4. Specify your unique paramaeters:
+```console
+nano variables.sh
+```
+
+```console
+YANDEX_DISK_SOURCE_DIR=your_yandex_disk_source_dir
+RSYNC_DESTINATION_DIR=your_andex_disk_destination_dir
+TELEGRAM_BOT_SECRET=your_telegram_bot_secret
+TELEGRAM_CHAT_ID=your_telegram_chat_id
+```
+
+### Make a crontab job to run rsync.sh script
+1. Open crontab
+```bash
+crontab -e
+```
+2. Add a new job for cron that will run every morning at 9 AM:
+```bash
+00 9 * * * $RSYNC_DIRECTORY_DIR/rsync.sh 2>&1 | /usr/bin/logger -t rsync.sh
+```
